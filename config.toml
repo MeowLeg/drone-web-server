@@ -1,0 +1,4 @@
+port = 4023
+db_path = "../dj-mqtt-msg/predict.db"
+static_dir = "./static"
+ffmpeg_dump_name = "ffmpeg-dump-jpeg"

@@ -1,0 +1,66 @@
+use super::*;
+pub mod start_drone;
+pub mod stop_drone;
+
+use axum::{
+    Json,
+    extract::{Extension, Query, rejection::JsonRejection},
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
+use http::HeaderMap;
+use serde_json::{Value, json};
+use std::error::Error;
+
+#[allow(dead_code)]
+pub trait ExecSql<T> {
+    async fn handle_post(
+        _cfg: Extension<Arc<Config>>,
+        _prms: Result<Json<T>, JsonRejection>,
+    ) -> Result<Json<Value>, WebErr> {
+        Ok(Json(json!({})))
+    }
+
+    async fn handle_get(
+        _cfg: Extension<Arc<Config>>,
+        _prms: Option<Query<T>>,
+    ) -> Result<Json<Value>, WebErr> {
+        Ok(Json(json!({})))
+    }
+
+    async fn handle_get_with_headers(
+        _headers: HeaderMap,
+        _cfg: Extension<Arc<Config>>,
+        _prms: Option<Query<T>>,
+    ) -> Result<Json<Value>, WebErr> {
+        Ok(Json(json!({})))
+    }
+}
+
+#[derive(Debug)]
+pub struct WebErr(Box<dyn Error + Send + Sync>);
+
+impl IntoResponse for WebErr {
+    fn into_response(self) -> Response {
+        let j = json!({
+            "success": false,
+            "errMsg": format!("{}", self.0),
+            "data": "",
+        })
+        .to_string();
+        Response::builder()
+            .status(StatusCode::OK)
+            .header("Content-Type", "application/json")
+            .body(j.into())
+            .unwrap()
+    }
+}
+
+impl<E> From<E> for WebErr
+where
+    E: Into<Box<dyn Error + Send + Sync>>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
+}
