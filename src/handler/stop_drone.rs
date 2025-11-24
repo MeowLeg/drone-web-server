@@ -21,6 +21,11 @@ impl ExecSql<StopDroneReq> for StopDrone {
             .execute(&mut conn)
             .await?;
 
+        let _ = sqlx::query("delete from stream_tag where uuid = ?")
+            .bind(&prms.uuid)
+            .execute(&mut conn)
+            .await?;
+
         let sys = System::new_all();
         for p in sys.processes().values() {
             if let Some(s) = p.name().to_str()
@@ -31,13 +36,19 @@ impl ExecSql<StopDroneReq> for StopDrone {
             {
                 let b = p.kill();
                 return Ok(Json(json!({
-                    "success": b,
+                    "success": true,
+                    "data": {
+                        "task_killed": b
+                    }
                 })));
             }
         }
 
         Ok(Json(json!({
-            "success": false,
+            "success": true,
+            "data": {
+                "task_killed": false
+            }
         })))
     }
 }

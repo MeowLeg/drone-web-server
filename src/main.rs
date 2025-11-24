@@ -1,7 +1,7 @@
 use anyhow::Result;
 use axum::{
     Extension,
-    routing::{Router, get},
+    routing::{Router, get, post},
 };
 use clap::Parser;
 use serde::{Deserialize, Serialize};
@@ -43,9 +43,9 @@ async fn main() -> Result<()> {
     let cfg = Arc::new(read_from_toml(&cli.config)?);
     let app = Router::new()
         .nest_service("/static", ServeDir::new(&cfg.static_dir))
-        .route("/", get(async || "hello, msg data!".to_string()))
-        .route("/start", get(start_drone::StartDrone::handle_post))
-        .route("/stop", get(stop_drone::StopDrone::handle_post))
+        .route("/", get(async || "hello, drone msg data!".to_string()))
+        .route("/start", post(start_drone::StartDrone::handle_post))
+        .route("/stop", post(stop_drone::StopDrone::handle_post))
         .layer(Extension(Arc::clone(&cfg)));
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", cfg.port)).await?;
     axum::serve(listener, app).await?;

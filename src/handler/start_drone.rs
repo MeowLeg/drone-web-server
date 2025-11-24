@@ -11,13 +11,15 @@ pub struct StartDroneReq {
     flight_uuid: String,
     sn: String,
     rtmp: String,
-    labels: Vec<Lebal>,
+    labels: Vec<Label>,
+    #[serde(rename = "tenantId")]
+    tenant_id: i64,
 }
 
 #[allow(unused)]
 #[derive(Debug, Deserialize)]
-#[serde(rename = "camelCase")]
-pub struct Lebal {
+#[serde(rename_all = "camelCase")]
+pub struct Label {
     id: i64,
     code: String,
     name: String,
